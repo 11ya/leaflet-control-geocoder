@@ -41,16 +41,23 @@ module.exports = {
 			icon.innerHTML = '&nbsp;';
 			icon.type = 'button';
 
-			input = this._input = L.DomUtil.create('input', '', form);
-			input.type = 'text';
-			input.placeholder = this.options.placeholder;
+			inputContainer = container;
 
-			this._errorElement = L.DomUtil.create('div', className + '-form-no-error', container);
+			if (this.options.input) {
+				input = this._input = this.options.input;
+				inputContainer = input.parentNode;
+			} else {
+				input = this._input = L.DomUtil.create('input', '', form);
+				input.type = 'text';
+				input.placeholder = this.options.placeholder;
+			}
+
+			this._errorElement = L.DomUtil.create('div', className + '-form-no-error', inputContainer);
 			this._errorElement.innerHTML = this.options.errorMessage;
 
 			this._alts = L.DomUtil.create('ul',
 				className + '-alternatives leaflet-control-geocoder-alternatives-minimized',
-				container);
+				inputContainer);
 			L.DomEvent.disableClickPropagation(this._alts);
 
 			L.DomEvent.addListener(input, 'keydown', this._keydown, this);
@@ -286,11 +293,11 @@ module.exports = {
 				break;
 			default:
 				var v = this._input.value;
-				if (this.options.geocoder.suggest && v !== this._lastGeocode) {
+				if (this.options.suggest && v !== this._lastGeocode) {
 					clearTimeout(this._suggestTimeout);
 					if (v.length >= this.options.suggestMinLength) {
 						this._suggestTimeout = setTimeout(L.bind(function() {
-							this._geocode(true);
+							this._geocode(this.options.geocoder.suggest);
 						}, this), this.options.suggestTimeout);
 					} else {
 						this._clearResults();
